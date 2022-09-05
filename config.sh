@@ -136,22 +136,6 @@ function installPM2() {
     fi
 }
 
-function setPM2() {
-    while kill -0 $pid 2&>1 > /dev/null;
-    do
-        for frame in $frames;
-        do
-            printf "\r$frame Setting up PM2 ..." 
-            sleep 0.1
-        done
-    done
-    //grep comand from pm2 startup script
-    pm2 startup | grep -o "sudo.*" | bash &> /dev/null
-    pm2 save &> /dev/null
-    echo "\n";
-    echo "\n";
-    echo "PM2 set as system service!";
-}
 
 function installGit() {
     while kill -0 $pid 2&>1 > /dev/null;
@@ -177,13 +161,51 @@ function installGit() {
     fi
 }
 
+function setupRunner() {
+    while kill -0 $pid 2&>1 > /dev/null;
+    do
+        for frame in $frames;
+        do
+            printf "\r$frame Setting up runner ..." 
+            sleep 0.1
+        done
+    done
+    mkdir actions-runner && cd actions-runner 
+    curl -o actions-runner-linux-x64-2.296.1.tar.gz -L https://github.com/actions/runner/releases/download/v2.296.1/actions-runner-linux-x64-2.296.1.tar.gz &> /dev/null
+    echo "bc943386c499508c1841bd046f78df4f22582325c5d8d9400de980cb3613ed3b  actions-runner-linux-x64-2.296.1.tar.gz" | shasum -a 256 -c
+    tar xzf ./actions-runner-linux-x64-2.296.1.tar.gz
+    echo "Enter Token: "
+    read token
+    ./config.sh --url https://github.com/Usergy-io/Unit-Bot --token AKXO3IVKD65QNQEKNVTQ5L3DC2KZE
+    echo "Enter name: "
+    read name
+    ./config.sh --name $name
+    echo "Enter labels: "
+    read labels
+    ./config.sh --labels $labels
+    echo "Enter workdir: "
+    read workdir
+    ./config.sh --work $workdir
+    echo "Enter runner group: "
+    read group
+    ./config.sh --runnergroup $group
+    echo "Enter runner group: "
+    read group
+    ./config.sh --runnergroup $group
+    echo "Enter runner group: "
+    read group
+    
+    ./svc.sh install
+    ./svc.sh start
+    echo "Runner setup complete!";
+}
 
 updateapt &
 installNode &
 installNpm &
 installPM2 &
-setPM2 &
 installGit &
+setupRunner &
 
 wait 
 
