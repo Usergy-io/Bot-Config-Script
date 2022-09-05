@@ -1,22 +1,92 @@
 #!/bin/bash
-spinner() {
-    local PROC="$1"
-    local str="${2:-'Copyright of KatworX© Tech. Developed by Arjun Singh Kathait and Debugged by the ☆Stack Overflow Community☆'}"
-    local delay="0.1"
-    tput civis  # hide cursor
-    printf "\033[1;34m"
-    while [ -d /proc/$PROC ]; do
-        printf '\033[s\033[u[ / ] %s\033[u' "$str"; sleep "$delay"
-        printf '\033[s\033[u[ — ] %s\033[u' "$str"; sleep "$delay"
-        printf '\033[s\033[u[ \ ] %s\033[u' "$str"; sleep "$delay"
-        printf '\033[s\033[u[ | ] %s\033[u' "$str"; sleep "$delay"
-    done
-    printf '\033[s\033[u%*s\033[u\033[0m' $((${#str}+6)) " "  # return to normal
-    tput cnorm  # restore cursor
-    return 0
+# Shows a spinner while another command is running. Randomly picks one of 12 spinner styles.
+# @args command to run (with any parameters) while showing a spinner. 
+#       E.g. ‹spinner sleep 10›
+
+function shutdown() {
+  tput cnorm # reset cursor
+}
+trap shutdown EXIT
+
+function cursorBack() {
+  echo -en "\033[$1D"
 }
 
-## simple example with sleep
+function spinner() {
+  # make sure we use non-unicode character type locale 
+  # (that way it works for any locale as long as the font supports the characters)
+  local LC_CTYPE=C
+
+  local pid=$1 # Process Id of the previous running command
+
+  case $(($RANDOM % 12)) in
+  0)
+    local spin='⠁⠂⠄⡀⢀⠠⠐⠈'
+    local charwidth=3
+    ;;
+  1)
+    local spin='-\|/'
+    local charwidth=1
+    ;;
+  2)
+    local spin="▁▂▃▄▅▆▇█▇▆▅▄▃▂▁"
+    local charwidth=3
+    ;;
+  3)
+    local spin="▉▊▋▌▍▎▏▎▍▌▋▊▉"
+    local charwidth=3
+    ;;
+  4)
+    local spin='←↖↑↗→↘↓↙'
+    local charwidth=3
+    ;;
+  5)
+    local spin='▖▘▝▗'
+    local charwidth=3
+    ;;
+  6)
+    local spin='┤┘┴└├┌┬┐'
+    local charwidth=3
+    ;;
+  7)
+    local spin='◢◣◤◥'
+    local charwidth=3
+    ;;
+  8)
+    local spin='◰◳◲◱'
+    local charwidth=3
+    ;;
+  9)
+    local spin='◴◷◶◵'
+    local charwidth=3
+    ;;
+  10)
+    local spin='◐◓◑◒'
+    local charwidth=3
+    ;;
+  11)
+    local spin='⣾⣽⣻⢿⡿⣟⣯⣷'
+    local charwidth=3
+    ;;
+  esac
+
+  local i=0
+  tput civis # cursor invisible
+  while kill -0 $pid 2>/dev/null; do
+    local i=$(((i + $charwidth) % ${#spin}))
+    printf "%s" "${spin:$i:$charwidth}"
+
+    cursorBack 1
+    sleep .1
+  done
+  tput cnorm
+  wait $pid # capture exit code
+  return $?
+}
+
+("$@") &
+
+spinner $!
 
 
 echo "██████╗░░█████╗░████████╗  ██╗███╗░░██╗░██████╗████████╗░█████╗░██╗░░░░░██╗░░░░░███████╗██████╗░";
@@ -39,40 +109,21 @@ echo "\n";
 echo "\n";
 
 echo "This script will install all the packages and libraries neccesary for running unit bots.";
-echo "It won't install the runner component from github actions! That is done manually due to security reasons!";
+echo "Open a new runner in github each time you want to configure a bot.";
 
 echo "\n";
 
-sleep 5 &
-pid=$!
-frames="/ | \\ -"
-
-
 function updateapt() {
-    while kill -0 $pid 2&>1 > /dev/null;
-    do
-        for frame in $frames;
-        do
-            printf "\r$frame Updating packages..." 
-            sleep 0.1
-        done
-    done
-    sudo apt update &> /dev/null
+    echo "Updating apt...";
+    spinner sudo apt update &> /dev/null
     echo "\n";
     echo "\n";
     echo "Packages updated!";
 }
 
 function installNode() {
-    while kill -0 $pid 2&>1 > /dev/null;
-    do
-        for frame in $frames;
-        do
-            printf "\r$frame Installing Node ..." 
-            sleep 0.1
-        done
-    done
-    sudo apt install nodejs &> /dev/null
+    echo "Installing NodeJS...";
+    spinner sudo apt install nodejs &> /dev/null
     if which node > /dev/null
     then
         echo "\n";
@@ -89,15 +140,8 @@ function installNode() {
 }
 
 function installNpm() {
-    while kill -0 $pid 2&>1 > /dev/null;
-    do
-        for frame in $frames;
-        do
-            printf "\r$frame Installing NPM ..." 
-            sleep 0.1
-        done
-    done
-    sudo apt install npm &> /dev/null
+    echo "Installing NPM...";
+    spinner sudo apt install npm &> /dev/null
     if which npm > /dev/null
     then
         echo "\n";
@@ -113,15 +157,8 @@ function installNpm() {
 }
 
 function installPM2() {
-    while kill -0 $pid 2&>1 > /dev/null;
-    do
-        for frame in $frames;
-        do
-            printf "\r$frame Installing PM2 ..." 
-            sleep 0.1
-        done
-    done
-    sudo npm install pm2 -g &> /dev/null
+    echo "Installing PM2...";
+    spinner sudo npm install pm2 -g &> /dev/null
     if which pm2 > /dev/null
     then
         echo "\n";
@@ -136,77 +173,31 @@ function installPM2() {
     fi
 }
 
-
-function installGit() {
-    while kill -0 $pid 2&>1 > /dev/null;
-    do
-        for frame in $frames;
-        do
-            printf "\r$frame Installing Git ..." 
-            sleep 0.1
-        done
-    done
-    sudo apt install git &> /dev/null
-    if which git > /dev/null
-    then
-        echo "\n";
-        echo "\n";
-        echo "Installed Git!";
-    else
-        echo "\n";
-        echo "\n";
-        echo "Git installation failed!";
-        echo "Please install Git manually!";
-        exit 1
-    fi
-}
-
-function setupRunner() {
-    while kill -0 $pid 2&>1 > /dev/null;
-    do
-        for frame in $frames;
-        do
-            printf "\r$frame Setting up runner ..." 
-            sleep 0.1
-        done
-    done
-    mkdir actions-runner && cd actions-runner 
+function installRunner(){
+    echo "Installing unit-runner...";
+    mkdir actions-runner && cd actions-runner
     curl -o actions-runner-linux-x64-2.296.1.tar.gz -L https://github.com/actions/runner/releases/download/v2.296.1/actions-runner-linux-x64-2.296.1.tar.gz &> /dev/null
+    echo "Runner Download:";
     echo "bc943386c499508c1841bd046f78df4f22582325c5d8d9400de980cb3613ed3b  actions-runner-linux-x64-2.296.1.tar.gz" | shasum -a 256 -c
     tar xzf ./actions-runner-linux-x64-2.296.1.tar.gz
-    echo "Enter Token: "
-    read token
-    ./config.sh --url https://github.com/Usergy-io/Unit-Bot --token AKXO3IVKD65QNQEKNVTQ5L3DC2KZE
-    echo "Enter name: "
-    read name
-    ./config.sh --name $name
-    echo "Enter labels: "
-    read labels
-    ./config.sh --labels $labels
-    echo "Enter workdir: "
-    read workdir
-    ./config.sh --work $workdir
-    echo "Enter runner group: "
-    read group
-    ./config.sh --runnergroup $group
-    echo "Enter runner group: "
-    read group
-    ./config.sh --runnergroup $group
-    echo "Enter runner group: "
-    read group
-    
-    ./svc.sh install
-    ./svc.sh start
-    echo "Runner setup complete!";
+    echo "\n";
+    echo "\n";
+    echo "Installed unit-runner! Please continue with config!";
 }
 
 updateapt &
-installNode &
-installNpm &
-installPM2 &
-installGit &
-setupRunner &
+wait 
 
+installNode &
+wait
+
+installNpm &
+wait 
+
+installPM2 &
+wait
+
+installRunner &
 wait 
 
 echo "D0n3!";
