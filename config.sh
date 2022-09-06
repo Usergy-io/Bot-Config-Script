@@ -59,7 +59,7 @@ printf "Packages upgraded!\n";
 
 printf "\n";
 printf "Downloading Node...";
-yes | sudo apt install nodejs > /dev/null 2>&1 &
+sudo apt install nodejs -y > /dev/null 2>&1 &
 PID=$!
 i=1
 sp="/-\|"
@@ -74,7 +74,7 @@ node -v
 
 printf "\n";
 printf "Downloading NPM...";
-yes | sudo apt install NPM > /dev/null 2>&1 &
+sudo apt install NPM -y > /dev/null 2>&1 &
 PID=$!
 i=1
 sp="/-\|"
