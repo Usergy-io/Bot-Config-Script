@@ -74,7 +74,7 @@ node -v
 
 printf "\n";
 printf "Downloading NPM...";
-sudo apt install NPM -y > /dev/null 2>&1 &
+sudo apt install npm -y > /dev/null 2>&1 &
 PID=$!
 i=1
 sp="/-\|"
