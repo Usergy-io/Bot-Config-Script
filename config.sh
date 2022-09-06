@@ -75,7 +75,7 @@ npm -v
 
 printf "\n";
 printf "Installing PM2..";
-sudo npm install PM2 -g > /dev/null 2>&1 &
+sudo npm install pm2 -g > /dev/null 2>&1 &
 PID=$!
 i=1
 sp="/-\|"
