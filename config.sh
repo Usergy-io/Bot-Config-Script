@@ -161,5 +161,6 @@ printf "\n";
 printf "Downloaded Runner\n";
 
 printf "Configuration completed! Switching User please resume manual config!";
+sudo chmod -R a+rwx /home/apollo
 sudo su apollo
 exit 0
