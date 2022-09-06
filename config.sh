@@ -49,7 +49,7 @@ printf "NPM installed!\n";
 printf "\n";
 printf "Making Dir for Runner...\n";
 printf "\n";
-mkdir runner & cd runner 
+mkdir actions-runner && cd actions-runner
 printf "\n";
 printf "Dir made!\n";
 printf "\n";
