@@ -29,8 +29,8 @@ sudo -n true
 test $? -eq 0 || exit 1 "you should have sudo privilege to run this script\n"
 
 printf "\n";
-printf "Updating apt...\n";
-sleep 7 &
+printf "Updating apt...";
+sudo apt-get update > /dev/null 2>&1 &
 PID=$!
 i=1
 sp="/-\|"
@@ -39,45 +39,142 @@ while [ -d /proc/$PID ]
 do
   printf "\b${sp:i++%${#sp}:1}"
 done
-sudo apt update
 printf "\n";
 printf "Packages updated!\n";
-printf "\n";
-printf "Installing NodeJS...\n";
-printf "\n";
-sudo apt install nodejs
-printf "\n";
-printf "NodeJS installed!\n";
-printf "\n";
-printf "Installing NPM...\n";
-printf "\n";
-sudo apt install npm 
-printf "\n";
-printf "NPM installed!\n";
-printf "\n";
-printf "Making Dir for Runner...\n";
-printf "\n";
-mkdir actions-runner && cd actions-runner
-printf "\n";
-printf "Dir made!\n";
-printf "\n";
-printf "Downloading Runner...\n";
-printf "\n";
-curl -o actions-runner-linux-x64-2.296.1.tar.gz -L https://github.com/actions/runner/releases/download/v2.296.1/actions-runner-linux-x64-2.296.1.tar.gz 
-printf "\n";
-printf "Runner downloaded!\n";
-printf "\n";
-printf "Validating Runner...\n";
-printf "\n";
-printf "bc943386c499508c1841bd046f78df4f22582325c5d8d9400de980cb3613ed3b  actions-runner-linux-x64-2.296.1.tar.gz" | shasum -a 256 -c
-printf "\n";
-printf "Runner validated!\n";
-printf "Extracting Runner...\n";
-printf "\n";
-tar xzf ./actions-runner-linux-x64-2.296.1.tar.gz 
-printf "\n";
-printf "Runner extracted!\n";
-printf "\n";
-printf "Process done, continue to activte the runner in github.\n";
-exit 0
 
+printf "\n";
+printf "Upgrading apt...";
+sudo apt-get upgrade > /dev/null 2>&1 &
+PID=$!
+i=1
+sp="/-\|"
+echo -n ' '
+while [ -d /proc/$PID ]
+do
+  printf "\b${sp:i++%${#sp}:1}"
+done
+printf "\n";
+printf "Packages upgraded!\n";
+
+
+printf "\n";
+printf "Downloading Node...";
+sudo apt install nodejs -y > /dev/null 2>&1 &
+PID=$!
+i=1
+sp="/-\|"
+echo -n ' '
+while [ -d /proc/$PID ]
+do
+  printf "\b${sp:i++%${#sp}:1}"
+done
+printf "\n";
+printf "Node downloaded:";
+node -v
+
+printf "\n";
+printf "Downloading NPM...";
+sudo apt install npm -y > /dev/null 2>&1 &
+PID=$!
+i=1
+sp="/-\|"
+echo -n ' '
+while [ -d /proc/$PID ]
+do
+  printf "\b${sp:i++%${#sp}:1}"
+done
+printf "\n";
+printf "NPM installed: ";
+npm -v
+
+printf "\n";
+printf "Installing PM2..";
+sudo npm install pm2 -g > /dev/null 2>&1 &
+PID=$!
+i=1
+sp="/-\|"
+echo -n ' '
+while [ -d /proc/$PID ]
+do
+  printf "\b${sp:i++%${#sp}:1}"
+done
+printf "\n";
+printf "PM2 installed: ";
+pm2 status
+
+
+
+printf "\n";
+printf "Creating User for Daemon..";
+sudo adduser apollo --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+printf "apollo:Space123!" | sudo chpasswd
+PID=$!
+i=1
+sp="/-\|"
+echo -n ' '
+while [ -d /proc/$PID ]
+do
+  printf "\b${sp:i++%${#sp}:1}"
+done
+printf "\n";
+printf "User updated\n";
+
+
+
+printf "\n";
+printf "Giving Apollo sudo perms..";
+usermod -aG sudo apollo > /dev/null 2>&1 &
+PID=$!
+i=1
+sp="/-\|"
+echo -n ' '
+while [ -d /proc/$PID ]
+do
+  printf "\b${sp:i++%${#sp}:1}"
+done
+printf "\n";
+printf "Sudo attributed\n";
+
+
+
+printf "Switching dir to apollo\n"
+cd /home/apollo
+
+printf "\n";
+printf "Making Runner Dir..";
+sudo mkdir actions-runner && cd actions-runner 2>&1 &
+PID=$!
+i=1
+sp="/-\|"
+echo -n ' '
+while [ -d /proc/$PID ]
+do
+  printf "\b${sp:i++%${#sp}:1}"
+done
+printf "\n";
+printf "Made Runner Dir\n";
+
+
+
+
+
+printf "\n";
+printf "Downloading Runner..";
+sudo curl -o actions-runner-linux-x64-2.296.1.tar.gz -L https://github.com/actions/runner/releases/download/v2.296.1/actions-runner-linux-x64-2.296.1.tar.gz 
+sudo printf "bc943386c499508c1841bd046f78df4f22582325c5d8d9400de980cb3613ed3b  actions-runner-linux-x64-2.296.1.tar.gz" | shasum -a 256 -c
+sudo tar xzf ./actions-runner-linux-x64-2.296.1.tar.gz
+PID=$!
+i=1
+sp="/-\|"
+echo -n ' '
+while [ -d /proc/$PID ]
+do
+  printf "\b${sp:i++%${#sp}:1}"
+done
+printf "\n";
+printf "Downloaded Runner\n";
+
+printf "Configuration completed! Switching User please resume manual config!";
+sudo chmod -R a+rwx /home/apollo
+sudo su apollo
+exit 0
