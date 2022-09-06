@@ -30,6 +30,15 @@ test $? -eq 0 || exit 1 "you should have sudo privilege to run this script\n"
 
 printf "\n";
 printf "Updating apt...\n";
+sleep 7 &
+PID=$!
+i=1
+sp="/-\|"
+echo -n ' '
+while [ -d /proc/$PID ]
+do
+  printf "\b${sp:i++%${#sp}:1}"
+done
 sudo apt update
 printf "\n";
 printf "Packages updated!\n";
